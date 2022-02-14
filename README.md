@@ -8,6 +8,6 @@ Reports memory statistics but the real metric is calculated without taking into 
 ### check_tcp_stats.sh
 Reports:
 
-    - Total Active TCP Connections
-    - Total Established TCP Connections
-    - Number of Retransmitted TCP Packets
+    - Total Active TCP Connections (-o all)
+    - Total Established TCP Connections (-o est)
+    - Number of Retransmitted TCP Packets (-o retr)
