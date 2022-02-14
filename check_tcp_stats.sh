@@ -70,13 +70,13 @@ if [[ "$option" == "all" ]]; then
 	if [[ "$warning" =~ ^[0-9]+$ ]] && [[ "$critical" =~ ^[0-9]+$ ]]; then
 			all_metrics
 			if [ "$TCPAll" -ge "$warning" ]; then
-					echo "TCP Connections: CRITICAL Total: $TCPAll|tcp_total=$TCPAll;tcp_est=$TCPEst"
+					echo "TCP Connections: CRITICAL Total: $TCPAll|tcp_total=$TCPAll;;tcp_est=$TCPEst"
 					exit $ST_CR
 			elif [ "$TCPAll" -ge "$critical" ]; then
-					echo "TCP Connections: WARNING Total: $TCPAll|tcp_total=$TCPAll;tcp_est=$TCPEst"
+					echo "TCP Connections: WARNING Total: $TCPAll|tcp_total=$TCPAll;;tcp_est=$TCPEst"
 					exit $ST_WR
 			else
-					echo "TCP Connections: OK Total: $TCPAll|tcp_total=$TCPAll;tcp_est=$TCPEst"
+					echo "TCP Connections: OK Total: $TCPAll|tcp_total=$TCPAll;;tcp_est=$TCPEst"
 					exit $ST_OK
 			fi
 	else		# If inputs are not as expected, print help. 
@@ -86,13 +86,13 @@ elif [[ "$option" == "est" ]]; then
 	if [[ "$warning" =~ ^[0-9]+$ ]] && [[ "$critical" =~ ^[0-9]+$ ]]; then
 			all_metrics
 			if [ "$TCPEst" -ge "$warning" ]; then
-					echo "TCP Established Connections: CRITICAL Total: $TCPEst|tcp_total=$TCPAll;tcp_est=$TCPEst"
+					echo "TCP Established Connections: CRITICAL Total: $TCPEst|tcp_total=$TCPAll;;tcp_est=$TCPEst"
 					exit $ST_CR
 			elif [ "$TCPEst" -ge "$critical" ]; then
-					echo "TCP Established Connections: WARNING Total: $TCPEst|tcp_total=$TCPAll;tcp_est=$TCPEst"
+					echo "TCP Established Connections: WARNING Total: $TCPEst|tcp_total=$TCPAll;;tcp_est=$TCPEst"
 					exit $ST_WR
 			else
-					echo "TCP Established Connections: OK Total: $TCPEst|tcp_total=$TCPAll;tcp_est=$TCPEst"
+					echo "TCP Established Connections: OK Total: $TCPEst|tcp_total=$TCPAll;;tcp_est=$TCPEst"
 					exit $ST_OK
 			fi
 	else		# If inputs are not as expected, print help. 
