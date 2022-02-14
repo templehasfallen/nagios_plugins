@@ -8,7 +8,7 @@ if [ "$1" = "-w" ] && [ "$2" -gt "0" ] && [ "$3" = "-c" ] && [ "$4" -gt "0" ]; t
         memBuffer_m=`echo "$FreeM" |grep Mem |awk '{print $6}'`
         memCache_m=`echo "$FreeM" |grep Mem |awk '{print $7}'`
         memUsedPrc=`echo $((($memUsed_m*100)/$memTotal_m))||cut -d. -f1`
-		memWithoutCache=`echo $(((($memUsed_m*100)-($memCache_m*100))/$memTotal_m))||cut -d. -f1`
+		memWithoutCache=`echo $((($memUsed_m)-($memCache_m)))||cut -d. -f1`
 		memWithoutCachePerc=`echo $(((($memUsed_m*100)-($memCache_m*100))/$memTotal_m))||cut -d. -f1`
         if [ "$memWithoutCachePerc" -ge "$4" ]; then
                 echo "Memory: CRITICAL Total: $memTotal_m MB - Used: $memUsed_m MB - $memUsedPrc% used! ($memWithoutCache MB - $memWithoutCachePerc% excluding Cache)|TOTAL=$memTotal_m;;;; USED=$memUsed_m;;;; CACHE=$memCache_m;;;; BUFFER=$memBuffer_m;;;; TOTAL_NC=$memWithoutCache;;;;"
