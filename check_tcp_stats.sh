@@ -8,13 +8,14 @@ SED=`command -v sed`
 GREP=`command -v grep`
 SS=`command -v ss`
 NETSTAT=`command -v netstat`
+EXPR=`command -v expr`
 current_date=`date +"%Y%m%d"`
-tmpfile="/var/tmp/check_tcp_stats_dat"
+tmpfile="/tmp/check_tcp_stats_dat" #make sure to set to directory writable by NRPE user (normally nagios)
 if [[ -f $tmpfile ]];then
-    source /var/tmp/check_tcp_stats_dat
+    source $tmpfile
 	data_exists=true
 else
-    touch /var/tmp/check_tcp_stats_dat
+    touch $tmpfile
 	data_exists=false
 fi
 function show_usage (){
@@ -36,15 +37,15 @@ return $ST_UK
 function retr_daily (){
 	if [ "$data_exists" =  true ] ; then
 		if [ "$current_date" -gt "$saved_date" ] ; then
-			TCPRetrDaily=`expr $TCPRetr - $SavedRetr`
-			echo "saved_date='$current_date'" > /var/tmp/check_tcp_stats_dat
-			echo "SavedRetr=$TCPRetr" >> /var/tmp/check_tcp_stats_dat
+			TCPRetrDaily=`$EXPR $TCPRetr - $savedRetr`
+			echo "saved_date='$current_date'" > $tmpfile
+			echo "savedRetr=$TCPRetr" >> $tmpfile
 		else
-			TCPRetrDaily=`expr $TCPRetr - $SavedRetr`
+			TCPRetrDaily=`$EXPR $TCPRetr - $savedRetr`
 		fi
 	elif [ "$data_exists" = false ] ; then
-		echo "saved_date='$current_date'" > /var/tmp/check_tcp_stats_dat
-		echo "SavedRetr=$TCPRetr" >> /var/tmp/check_tcp_stats_dat
+		echo "saved_date='$current_date'" > $tmpfile
+		echo "savedRetr=$TCPRetr" >> $tmpfile
 		TCPRetrDaily=0
 	fi
 }
@@ -131,6 +132,6 @@ elif [[ "$option" == "retr" ]]; then
 elif [[ "$option" == "retr_daily" ]]; then
 	all_metrics
 	retr_daily
-	echo "TCP Retransmitted Packets Today: OK Total: $TCPRetrDaily|tcp_retr=$TCPRetrDaily"
+	echo "TCP Retransmitted Packets Today: OK Total: $TCPRetrDaily|tcp_retr_today=$TCPRetrDaily"
 	exit $ST_OK
 fi
