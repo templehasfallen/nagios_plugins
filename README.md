@@ -11,3 +11,4 @@ Reports:
     - Total Active TCP Connections (-o all)
     - Total Established TCP Connections (-o est)
     - Number of Retransmitted TCP Packets (-o retr)
+	- Number of Retransmitted TCP Packets today (-o retr_daily)
