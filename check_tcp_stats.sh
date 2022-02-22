@@ -20,7 +20,7 @@ else
 fi
 function show_usage (){
 	printf "TCP Connections Check for Nagios Core 4.x\n"
-	printf "Version 0.1a\n"
+	printf "Version 0.2b\n"
 	printf "\n"
     printf "Usage: $0 [options [parameters]]\n"
     printf "\n"
@@ -41,7 +41,11 @@ function retr_daily (){
 			echo "saved_date='$current_date'" > $tmpfile
 			echo "savedRetr=$TCPRetr" >> $tmpfile
 		else
-			TCPRetrDaily=`$EXPR $TCPRetr - $savedRetr`
+			if [[ "$TCPRetrDaily" =~ ^[0-9]+$ ]]; then
+				TCPRetrDaily=`$EXPR $TCPRetr - $savedRetr`
+			else
+				TCPRetrDaily=0
+			fi
 		fi
 	elif [ "$data_exists" = false ] ; then
 		echo "saved_date='$current_date'" > $tmpfile
