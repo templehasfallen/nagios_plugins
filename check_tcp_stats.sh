@@ -8,6 +8,15 @@ SED=`command -v sed`
 GREP=`command -v grep`
 SS=`command -v ss`
 NETSTAT=`command -v netstat`
+current_date=`date +"%Y%m%d"`
+tmpfile="/var/tmp/check_tcp_stats_dat"
+if [[ -f $tmpfile ]];then
+    source /var/tmp/check_tcp_stats_dat
+	data_exists=true
+else
+    touch /var/tmp/check_tcp_stats_dat
+	data_exists=false
+fi
 function show_usage (){
 	printf "TCP Connections Check for Nagios Core 4.x\n"
 	printf "Version 0.1a\n"
@@ -17,12 +26,27 @@ function show_usage (){
     printf "Options:\n"
     printf " -w|--warning warning level\n"
     printf " -c|--critical critical level\n"
-    printf " -o|--option all|retr|est (all | retransmitted packets | established)\n"
+    printf " -o|--option all|retr|est|retr_daily (all | retransmitted packets | established | retransmitted packets today)\n"
     printf " -h|--help, Print help\n"
 	printf "\n"
 	printf " TempleHasFallen (https://github.com/templehasfallen) 2022\n\n"
 
 return $ST_UK
+}
+function retr_daily (){
+	if [ "$data_exists" =  true ] ; then
+		if [ "$current_date" -gt "$saved_date" ] ; then
+			TCPRetrDaily=`expr $TCPRetr - $SavedRetr`
+			echo "saved_date='$current_date'" > /var/tmp/check_tcp_stats_dat
+			echo "SavedRetr=$TCPRetr" >> /var/tmp/check_tcp_stats_dat
+		else
+			TCPRetrDaily=`expr $TCPRetr - $SavedRetr`
+		fi
+	elif [ "$data_exists" = false ] ; then
+		echo "saved_date='$current_date'" > /var/tmp/check_tcp_stats_dat
+		echo "SavedRetr=$TCPRetr" >> /var/tmp/check_tcp_stats_dat
+		TCPRetrDaily=0
+	fi
 }
 while test -n "$1"; do
     case "$1" in
@@ -36,6 +60,8 @@ while test -n "$1"; do
 			elif [[ "$2" == "retr" ]]; then
 				option=$2
 			elif [[ "$2" == "est" ]]; then
+				option=$2
+			elif [[ "$2" == "retr_daily" ]]; then
 				option=$2
 			else
 				echo "Invalid -o or --option input"
@@ -69,10 +95,10 @@ all_metrics(){
 if [[ "$option" == "all" ]]; then
 	if [[ "$warning" =~ ^[0-9]+$ ]] && [[ "$critical" =~ ^[0-9]+$ ]]; then
 			all_metrics
-			if [ "$TCPAll" -ge "$warning" ]; then
+			if [ "$TCPAll" -ge "$critical" ]; then
 					echo "TCP Connections: CRITICAL Total: $TCPAll|tcp_total=$TCPAll;;tcp_est=$TCPEst"
 					exit $ST_CR
-			elif [ "$TCPAll" -ge "$critical" ]; then
+			elif [ "$TCPAll" -ge "$warning" ]; then
 					echo "TCP Connections: WARNING Total: $TCPAll|tcp_total=$TCPAll;;tcp_est=$TCPEst"
 					exit $ST_WR
 			else
@@ -85,10 +111,10 @@ if [[ "$option" == "all" ]]; then
 elif [[ "$option" == "est" ]]; then
 	if [[ "$warning" =~ ^[0-9]+$ ]] && [[ "$critical" =~ ^[0-9]+$ ]]; then
 			all_metrics
-			if [ "$TCPEst" -ge "$warning" ]; then
+			if [ "$TCPEst" -ge "$critical" ]; then
 					echo "TCP Established Connections: CRITICAL Total: $TCPEst|tcp_total=$TCPAll;;tcp_est=$TCPEst"
 					exit $ST_CR
-			elif [ "$TCPEst" -ge "$critical" ]; then
+			elif [ "$TCPEst" -ge "$warning" ]; then
 					echo "TCP Established Connections: WARNING Total: $TCPEst|tcp_total=$TCPAll;;tcp_est=$TCPEst"
 					exit $ST_WR
 			else
@@ -101,5 +127,10 @@ elif [[ "$option" == "est" ]]; then
 elif [[ "$option" == "retr" ]]; then
 	all_metrics
 	echo "TCP Retransmitted Packets: OK Total: $TCPRetr|tcp_retr=$TCPRetr"
+	exit $ST_OK
+elif [[ "$option" == "retr_daily" ]]; then
+	all_metrics
+	retr_daily
+	echo "TCP Retransmitted Packets Today: OK Total: $TCPRetrDaily|tcp_retr=$TCPRetrDaily"
 	exit $ST_OK
 fi
